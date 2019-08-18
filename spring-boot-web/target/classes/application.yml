@@ -1,0 +1,10 @@
+debug: true
+
+jms1:
+  name: name 1
+  value: value 1
+
+jms2:
+  name: name 2
+  value: value 2
+
