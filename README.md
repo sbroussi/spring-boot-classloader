@@ -20,7 +20,7 @@ http://localhost:8080/index.html
 
 # TO DO:
 
-* need to improve the LifeCycle of JARs to be loaded at startup
- - persist the list of URLs outside memory before restarting
- - restart
- - read the list of JARS to be loaded and load them
+- need to improve the LifeCycle of JARs to be loaded at startup
+  - persist the list of URLs outside memory before restarting
+  - restart
+  - read the list of JARS to be loaded and load them
