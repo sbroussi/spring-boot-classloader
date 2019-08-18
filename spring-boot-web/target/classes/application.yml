@@ -1,5 +1,12 @@
 debug: true
 
+# create a 'Restart'able ClassLoader to reload classes on demand
+# org.springframework.boot.devtools.restart.Restarter.getInstance().restart();
+spring:
+  devtools:
+    restart:
+      enabled: true
+
 jms1:
   name: name 1
   value: value 1
