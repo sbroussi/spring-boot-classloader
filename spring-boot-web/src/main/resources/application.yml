@@ -6,6 +6,8 @@ spring:
   devtools:
     restart:
       enabled: true
+    livereload:
+      enabled: false
 
 jms1:
   name: name 1
