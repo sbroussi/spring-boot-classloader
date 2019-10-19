@@ -2,6 +2,7 @@ package com.sbroussi.spring2.demo;
 
 import com.sbroussi.spring2.demo.service.AppService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,48 +39,57 @@ public class App {
         service.dumpBeans();
     }
 
-    private void runCommand(final String command) {
-        runCommand(command, false);
+    public static int runCommand(final String command) {
+        return runCommand(command, false);
     }
 
-    private void runCommand(final String command, final boolean waitForProcess) {
+    /**
+     * @param command        The shell command line to execute
+     * @param waitForProcess TRUE to wait for the end of the shell command, log the output and return the exit code
+     * @return the exit value of the process (or '0' if no wait)
+     */
+    public static int runCommand(final String command, final boolean waitForProcess) {
 
-        /*
-        // -- Linux --
-        // processBuilder.command("bash", "-c", "ls /home/mkyong/"); // Run a command
-        // processBuilder.command("path/to/hello.sh");               // Run a shell script
-        // -- Windows --
-        // processBuilder.command("cmd.exe", "/c", "dir C:\\Users\\mkyong"); // Run a command
-        // processBuilder.command("C:\\Users\\mkyong\\hello.bat");           // Run a shell script
-        */
+        log.info("execute [" + SystemUtils.OS_NAME + "] command: [" + command + "]");
 
-        log.info("execute command: [" + command + "]");
-
+        int exitCode = 0;
         try {
             ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.command("bash", "-c", command);
+
+            if (SystemUtils.IS_OS_LINUX) {
+                processBuilder.command("bash", "-c", command);
+            } else if (SystemUtils.IS_OS_WINDOWS) {
+                processBuilder.command("cmd.exe", "/c", command);
+            } else {
+                throw new IllegalStateException("OS is not supported: " + SystemUtils.OS_NAME);
+            }
 
             Process process = processBuilder.start();
 
             if (waitForProcess) {
 
                 StringBuilder output = new StringBuilder(4 * 1024);
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
                 String line;
                 while ((line = reader.readLine()) != null) {
                     output.append(line).append("\n");
                 }
 
-                int exitVal = process.waitFor();
+                exitCode = process.waitFor();
 
-                log.info("command returned exit code [{}] output is: [{}]", exitVal, output.toString());
+                if (exitCode == 0) {
+                    log.info("SUCCESS: command returned exit code [{}] output is: [{}]", exitCode, output.toString());
+                } else {
+                    log.error("ERROR: command returned exit code [{}] output is: [{}]", exitCode, output.toString());
+                }
             }
 
         } catch (Exception e) {
-            log.error("error while executing command: [" + command + "]", e);
+            log.error("error while executing command: [" + command
+                    + "] on OS [" + SystemUtils.OS_NAME + "]", e);
         }
+        return exitCode;
 
     }
 
